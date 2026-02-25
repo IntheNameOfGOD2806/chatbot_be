@@ -89,6 +89,47 @@ app.get('/v1/sessions', async (req, res) => {
 
 /**
  * @swagger
+ * /v1/session/{session_id}:
+ *   get:
+ *     summary: Retrieve a chat session by ID
+ *     parameters:
+ *       - in: path
+ *         name: session_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The session ID
+ *     responses:
+ *       200:
+ *         description: Session details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       404:
+ *         description: Session not found
+ *       500:
+ *         description: Server error
+ */
+app.get('/v1/session/:session_id', async (req, res) => {
+    try {
+        const { session_id } = req.params;
+        const db = await connectDB();
+        const session = await db.collection('sessions').findOne({ session_id });
+
+        if (!session) {
+            return res.status(404).json({ error: 'Session not found' });
+        }
+        res.json({ session });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to retrieve session' });
+    }
+});
+
+
+/**
+ * @swagger
  * /v1/chat:
  *   post:
  *     summary: Send a message to the chatbot
